@@ -6,11 +6,12 @@ use crate::pieces::Piece;
 
 mod functions;
 use crate::functions::{
-    generate_bishop_movements, generate_queen_movements, generate_tower_movements, render_board,
+    generate_bishop_movements, generate_queen_movements, generate_tower_movements, blue_turn
 };
 
 fn main() {
-    
+
+        
     let mut all_pieces = vec![
         vec![
             
@@ -158,56 +159,56 @@ fn main() {
             Piece {
                 representation: 'p',
                 team: 'B',
-                movements: vec![[1, 0], [2, 0], [1, 1], [1, -1]],
+                movements: vec![[-1, 0], [-2, 0], [-1, 1], [-1, -1]],
                 cords: [6, 0],
                 selected: false,
             },
             Piece {
                 representation: 'p',
                 team: 'B',
-                movements: vec![[1, 0], [2, 0], [1, 1], [1, -1]],
+                movements: vec![[-1, 0], [-2, 0], [-1, 1], [-1, -1]],
                 cords: [6, 1],
                 selected: false,
             },
             Piece {
                 representation: 'p',
                 team: 'B',
-                movements: vec![[1, 0], [2, 0], [1, 1], [1, -1]],
+                movements: vec![[-1, 0], [-2, 0], [-1, 1], [-1, -1]],
                 cords: [6, 2],
                 selected: false,
             },
             Piece {
                 representation: 'p',
                 team: 'B',
-                movements: vec![[1, 0], [2, 0], [1, 1], [1, -1]],
+                movements: vec![[-1, 0], [-2, 0], [-1, 1], [-1, -1]],
                 cords: [6, 3],
                 selected: false,
             },
             Piece {
                 representation: 'p',
                 team: 'B',
-                movements: vec![[1, 0], [2, 0], [1, 1], [1, -1]],
+                movements: vec![[-1, 0], [-2, 0], [-1, 1], [-1, -1]],
                 cords: [6, 4],
                 selected: false,
             },
             Piece {
                 representation: 'p',
                 team: 'B',
-                movements: vec![[1, 0], [2, 0], [1, 1], [1, -1]],
+                movements: vec![[-1, 0], [-2, 0], [-1, 1], [-1, -1]],
                 cords: [6, 5],
                 selected: false,
             },
             Piece {
                 representation: 'p',
                 team: 'B',
-                movements: vec![[1, 0], [2, 0], [1, 1], [1, -1]],
+                movements: vec![[-1, 0], [-2, 0], [-1, 1], [-1, -1]],
                 cords: [6, 6],
                 selected: false,
             },
             Piece {
                 representation: 'p',
                 team: 'B',
-                movements: vec![[1, 0], [2, 0], [1, 1], [1, -1]],
+                movements: vec![[-1, 0], [-2, 0], [-1, 1], [-1, -1]],
                 cords: [6, 7],
                 selected: false,
             },
@@ -295,7 +296,7 @@ fn main() {
                 selected: /*  */false,
             },
         ],
-    ]; 
+    ];
 
     let mut game_board: [[[char; 2]; 8]; 8] = [[['·', ' ']; 8]; 8];
 
@@ -307,12 +308,9 @@ fn main() {
             game_board[piece.cords[0]  as usize][piece.cords[1]  as usize] = [piece.representation, piece.team];
         }
 
-        /* for row in game_board {
-            println!("{:?}", row);
-        } */
+        green_turn(&mut game_board, &mut all_pieces);
 
-        render_board(&all_pieces);
 
-        green_turn(&mut game_board, &mut all_pieces)
+        blue_turn(&mut game_board, &mut all_pieces);
     }
 }

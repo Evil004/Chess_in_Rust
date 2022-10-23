@@ -1,5 +1,3 @@
-mod pieces_structs;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Piece {
     pub representation: char,

@@ -36,8 +36,6 @@ fn check_cords(row: i8, col: i8, all_pieces: &Vec<Vec<Piece>>) -> Option<&Piece>
 /// ## Parameters
 ///
 /// * `game_board` - An array of 8 arrays of 8 arrays of 2 characters, the first arrays are the rows and the second are the columns, the characters indicate the piece and the color
-///
-///
 pub fn render_board(all_pieces: &Vec<Vec<Piece>>) {
     for row in 0..=7 {
         for col in 0..=7 {
@@ -220,8 +218,6 @@ fn check_if_can_move(
     all_pieces: &Vec<Vec<Piece>>,
     piece_cords: [i8; 2],
 ) -> bool {
-    let final_cords = add_arrays_i8_2(movement, piece_cords);
-    println!("{:?}\n{:?}\n{:?}", movement, piece_cords, final_cords);
 
     //Comprobamso los movimientos horizontales
     if movement[0] == 0 {
@@ -237,12 +233,11 @@ fn check_if_can_move(
     }
 }
 
-
 /// Una funcion que comprueba si una pieza se puede mover\
 /// a una casilla indicada y en caso de ser posible la mueve\
 /// devuelve `true` si se ha podido realizar el movimiento o\
 /// `false` si no se ha podido 
-fn move_piece(
+fn move_green_piece(
     game_board: &mut [[[char; 2]; 8]; 8],
     all_pieces: &mut Vec<Vec<Piece>>,
     selected_piece: &mut Piece,
@@ -265,6 +260,7 @@ fn move_piece(
             // Comprobamos si hay una pieza de nuestro equipo en la casilla seleccionada
             if all_pieces[0].iter().find(|x| x.cords == square_to_move).is_some(){
                 println!("No te puedes mover ahi porque ya hay una pieza");
+
                 return false;
             }
 
@@ -289,9 +285,61 @@ fn move_piece(
             return true;
         }
     }
+
     return false;
 }
 
+fn move_blue_piece(
+    game_board: &mut [[[char; 2]; 8]; 8],
+    all_pieces: &mut Vec<Vec<Piece>>,
+    selected_piece: &mut Piece,
+    movement: [i8; 2],
+    square_to_move: [i8; 2],
+) -> bool {
+    for piece_index in 0..all_pieces[1].len() {
+
+        //He hecho esto, no tenia otra opcion, perdon 😥
+        if format!("{:?}", all_pieces[1][piece_index]) == format!("{:?}", selected_piece) {
+            
+            // Si la pieza es un caballos no hacemos la comprobacion de si se puede mover
+            if selected_piece.representation != KNIGHT_REPRESENTATION{
+            
+                if !check_if_can_move(movement, &all_pieces, selected_piece.cords) {
+                    return false;
+                }
+            }
+            
+            // Comprobamos si hay una pieza de nuestro equipo en la casilla seleccionada
+            if all_pieces[1].iter().find(|x| x.cords == square_to_move).is_some(){
+                println!("No te puedes mover ahi porque ya hay una pieza");
+
+                return false;
+            }
+
+            // Comprobamos si hay una pieza de enemiga en la casilla seleccionada
+
+            if all_pieces[1].iter().find(|x| x.cords == square_to_move).is_some(){
+
+                // Si la hay la eliminamos del vector de fichas
+                let index_to_kill = all_pieces[1].iter().position(|x| x.cords == square_to_move).unwrap();
+                all_pieces[1].remove(index_to_kill);
+            }
+
+            //Actualizamos el tablero, el vector de piezas y la pieza a la nueva posicion
+            game_board[selected_piece.cords[0] as usize][selected_piece.cords[1] as usize] =['·', ' '];
+
+            selected_piece.cords = square_to_move;
+
+            selected_piece.selected = false;
+
+            all_pieces[1][piece_index] = selected_piece.clone();
+
+            return true;
+        }
+    }
+
+    return false;
+}
 
 /// Returns a piece that is in the coordinates that the user to introduced. \
 /// If the user instructs a box that cannot be selected again until selecting a correct square
@@ -332,6 +380,7 @@ fn select_piece(all_pieces: &mut Vec<Vec<Piece>>, game_board: &mut [[[char; 2]; 
             }
 
             'B' => {
+
                 if turn == 'W'{
                     println!("No puedes seleccionar una ficha del otro equipo.");
                     continue 'select_piece;
@@ -380,6 +429,9 @@ fn is_oob(selected_piece: &mut Piece, movement: [i8; 2]) -> bool {
 
 pub fn green_turn(game_board: &mut [[[char; 2]; 8]; 8], all_pieces: &mut Vec<Vec<Piece>>) {
 
+    println!("{}\n", format!("Green turn").green());
+
+    render_board(&all_pieces);
     // Almacenamos la pieza seleccionada por el usuario
     let mut selected_piece = select_piece(all_pieces, game_board,'W');
 
@@ -404,7 +456,7 @@ pub fn green_turn(game_board: &mut [[[char; 2]; 8]; 8], all_pieces: &mut Vec<Vec
 
             // Si el movimiento introducido por el usuario esta en la lista de movimientos de la pieza llamamos a la funcion que movera la pieza
             if square_to_move == posible_movement {
-                if move_piece(game_board, all_pieces, &mut selected_piece, movement, square_to_move) {
+                if move_green_piece(game_board, all_pieces, &mut selected_piece, movement, square_to_move) {
                     break 'move_piece;
                 } else {
                     continue 'move_piece;
@@ -413,6 +465,52 @@ pub fn green_turn(game_board: &mut [[[char; 2]; 8]; 8], all_pieces: &mut Vec<Vec
                 continue;
             }
         }
+        println!("No te puedes mover a esa posicion")
+    }
+}
+
+pub fn blue_turn(game_board: &mut [[[char; 2]; 8]; 8], all_pieces: &mut Vec<Vec<Piece>>) {
+
+    println!("{}\n", format!("Blue turn").blue());
+
+    render_board(&all_pieces);
+
+    // Almacenamos la pieza seleccionada por el usuario
+    let mut selected_piece = select_piece(all_pieces, game_board,'B');
+
+    'move_piece: loop {
+        
+        render_board(&all_pieces);
+
+        // Le pedimos al usuario las cordenadas a donde quiere moverse
+        println!("Introduce a donde moverte");
+
+        let square_to_move = user_select_square();
+
+        // Por cada movimiento posible de la pieza comprobamos si esta el que el usuario ha introducido
+        for movement in selected_piece.clone().movements {
+
+            // Comprobamos que el movimiento no queda fuera del tablero
+            if is_oob(&mut selected_piece, movement) {
+                continue;
+            }
+
+            let posible_movement = add_arrays_i8_2(selected_piece.cords as [i8; 2], movement);
+
+            // Si el movimiento introducido por el usuario esta en la lista de movimientos de la pieza llamamos a la funcion que movera la pieza
+            
+            if square_to_move == posible_movement {
+                if move_blue_piece(game_board, all_pieces, &mut selected_piece, movement, square_to_move) {
+                    break 'move_piece;
+                } else {
+                    continue 'move_piece;
+                }
+            } else {
+                continue;
+            }
+        }
+        println!("B");
+
         println!("No te puedes mover a esa posicion")
     }
 }
