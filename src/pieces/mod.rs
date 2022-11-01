@@ -5,4 +5,5 @@ pub struct Piece {
     pub movements: Vec<[i8; 2]>,
     pub cords: [i8;2],
     pub selected: bool,
+    pub firts_movement:bool
 }
